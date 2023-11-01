@@ -1,0 +1,14 @@
+# Dependency directories
+node_modules/
+
+# Builds
+build/
+
+# Vscode
+.vscode/
+
+# Files
+Files/
+
+# Env's
+.env
