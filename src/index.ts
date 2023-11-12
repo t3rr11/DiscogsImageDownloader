@@ -1,5 +1,5 @@
 import { Help, NotYetImplemented } from './helpers/commands';
-import Run from './helpers/loop';
+import { run as Run, runSearch as RunSearch } from './helpers/loop';
 
 require('dotenv').config();
 
@@ -11,9 +11,13 @@ process.stdin.setEncoding('utf8');
 process.stdin.on('data', async (text) => {
   let input = text.toString().trim().toUpperCase();
 
+  console.log(input);
+
   switch (input) {
     case 'START':
       return Run();
+    case 'START SEARCH':
+      return RunSearch();
     case 'RETRY':
       return NotYetImplemented();
     case 'HELP':
@@ -24,4 +28,4 @@ process.stdin.on('data', async (text) => {
 });
 
 // App has started
-console.log('\x1b[1;35m%s\x1b[0m', `I have started to listen!\nTo Start use: Start, Retry or Help.`);
+console.log('\x1b[1;35m%s\x1b[0m', `I have started to listen!\nTo Start use: Start, Start Search, Retry or Help.`);

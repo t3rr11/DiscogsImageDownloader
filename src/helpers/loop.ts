@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 import { Release, ReleaseResponse } from '../types/release';
-import { LoadBarcodesFromCSV } from './csv';
+import { LoadBarcodesFromCSV, LoadNamesFromCSV } from './csv';
 import { request } from './request';
 import { Record } from '../types/record';
 import { MasterImage, MasterResponse } from '../types/master';
@@ -27,6 +27,44 @@ export const run = async () => {
   }
 
   logger('INFO', `Finished loop`);
+};
+
+export const runSearch = async () => {
+  const records = await LoadNamesFromCSV();
+
+  for (let record of records) {
+    // Sleep for 2 seconds to wait out the rate limit
+    await sleep(2200);
+
+    logger('INFO', `Starting: ${record.name}`);
+    const release = await search(record);
+    if (!release) continue;
+    if (release.master_id === 0) continue;
+
+    const master = await getMaster(release);
+    if (!master) continue;
+
+    await downloadImage(master.uri, record).catch((err: Error) => {});
+  }
+
+  logger('INFO', `Finished loop`);
+};
+
+const search = async (record: Record): Promise<Release | void> => {
+  return await request<ReleaseResponse>(
+    `https://api.discogs.com/database/search?q=${record.name}&type=Release`
+  )
+    .then((release) => {
+      if (release.results.length > 0) {
+        return release.results[0];
+      } else {
+        logger('WARN', `No release found for name: ${record.name}`);
+      }
+    })
+    .catch((err: AxiosError) => {
+      // TODO: Add error handling
+      logger('ERROR', `Failed to retrieve release for name: ${record.name}`);
+    });
 };
 
 const getRelease = async (record: Record): Promise<Release | void> => {
@@ -60,4 +98,3 @@ const getMaster = async (release: Release): Promise<MasterImage | void> => {
       logger('ERROR', `Failed to retrieve master for master_id: ${release.master_id}`);
     });
 };
-export default run;
