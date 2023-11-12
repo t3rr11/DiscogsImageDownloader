@@ -14,3 +14,4 @@ Build using Node 18.18.0
 - Run `npm install`
 - Then run `npm run start`
 - Type `start` and it should start running through your `import.csv` file downloading images and saving them to `/data/images`
+- Or Type `start search` and it should start running through your `search.csv` file downloading images and saving them to `/data/images`

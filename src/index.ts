@@ -11,8 +11,6 @@ process.stdin.setEncoding('utf8');
 process.stdin.on('data', async (text) => {
   let input = text.toString().trim().toUpperCase();
 
-  console.log(input);
-
   switch (input) {
     case 'START':
       return Run();
