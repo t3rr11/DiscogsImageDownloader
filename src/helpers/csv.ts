@@ -10,6 +10,8 @@ export const LoadBarcodesFromCSV = async (): Promise<Record[]> => {
       csvRows.map((row) => ({
         name: row.name,
         barcode: row.barcode,
+        title: row.title,
+        artist: row.artist,
       }))
     );
 };
@@ -23,6 +25,8 @@ export const LoadNamesFromCSV = async (): Promise<Record[]> => {
       csvRows.map((row) => ({
         name: row.name,
         barcode: row.barcode,
+        title: row.title,
+        artist: row.artist,
       }))
     );
 };

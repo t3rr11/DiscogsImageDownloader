@@ -1,9 +1,11 @@
+import * as fs from 'fs';
+import json2csv from 'json2csv';
 import { AxiosError } from 'axios';
 import { Release, ReleaseResponse } from '../types/release';
 import { LoadBarcodesFromCSV, LoadNamesFromCSV } from './csv';
 import { request } from './request';
 import { Record } from '../types/record';
-import { MasterImage, MasterResponse } from '../types/master';
+import { MasterResponse } from '../types/master';
 import { downloadImage } from './image';
 import { sleep } from './sleep';
 import { logger } from './logger';
@@ -23,8 +25,15 @@ export const run = async () => {
     const master = await getMaster(release);
     if (!master) continue;
 
-    await downloadImage(master.uri, record).catch((err: Error) => {});
+    // Update the record with title and name
+    record.title = master.title;
+    record.artist = master.artists[0].name;
+
+    await downloadImage(master.images[0].uri, record).catch((err: Error) => {});
   }
+
+  // Save CSV file
+  await fs.writeFileSync('./data/import.csv', json2csv.parse(records));
 
   logger('INFO', `Finished loop`);
 };
@@ -44,8 +53,15 @@ export const runSearch = async () => {
     const master = await getMaster(release);
     if (!master) continue;
 
+    // Update the record with title and name
+    record.title = master.title;
+    record.artist = master.artists[0].name;
+
     await downloadImage(master.uri, record).catch((err: Error) => {});
   }
+
+  // Save CSV file
+  await fs.writeFileSync('./data/import.csv', json2csv.parse(records));
 
   logger('INFO', `Finished loop`);
 };
@@ -84,11 +100,11 @@ const getRelease = async (record: Record): Promise<Release | void> => {
     });
 };
 
-const getMaster = async (release: Release): Promise<MasterImage | void> => {
+const getMaster = async (release: Release): Promise<MasterResponse | void> => {
   return await request<MasterResponse>(`https://api.discogs.com/masters/${release.master_id}`)
     .then((master) => {
       if (master.images.length > 0) {
-        return master.images[0];
+        return master;
       } else {
         logger('WARN', `No images found found for master_id: ${release.master_id}`);
       }
